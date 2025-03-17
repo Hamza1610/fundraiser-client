@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useForm, UseFormRegister } from 'react-hook-form';
 import { auth } from '../config/firebase'; // Configure Firebase first
 import { toast, ToastContainer } from 'react-toastify';
+import { useRouter } from 'next/router'
+import { FcGoogle } from 'react-icons/fc';
 import { 
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -17,13 +19,15 @@ const AuthPage = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>();
   const [resetEmail, setResetEmail] = useState('');
   const [showResetModal, setShowResetModal] = useState(false);
-
+  const router = useRouter()
   // Firebase Auth Handlers
   const handleEmailPasswordAuth = async (data: FormData) => {
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, data.email, data.password);
         toast.success('Successfully logged in!');
+        // Redirect to campaign page
+        setTimeout(() => router.push('/campaigns'), 4000);
       } else {
         if (data.password !== data.confirmPassword) {
           toast.error('Passwords do not match!');
@@ -31,6 +35,9 @@ const AuthPage = () => {
         }
         await createUserWithEmailAndPassword(auth, data.email, data.password);
         toast.success('Account created successfully!');
+        // Redirect to campaign page
+        setTimeout(() => router.push('/campaigns'), 4000);
+
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -42,6 +49,8 @@ const AuthPage = () => {
     try {
       await signInWithPopup(auth, provider);
       toast.success('Google authentication successful!');
+      // Redirect to campaign page
+      setTimeout(() => router.push('/campaigns'), 4000);
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -74,9 +83,9 @@ const AuthPage = () => {
         <button
           onClick={handleGoogleAuth}
           className="w-full flex items-center justify-center gap-2 bg-blue-100 text-blue-900 py-3 rounded-lg 
-                   hover:bg-blue-200 transition-colors mb-6"
+                  hover:bg-blue-200 transition-colors mb-6"
         >
-          <img src="/google-icon.svg" alt="Google" className="w-6 h-6" />
+          <FcGoogle className="w-6 h-6" />
           Continue with Google
         </button>
 
