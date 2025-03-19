@@ -1,5 +1,6 @@
 // components/CampaignCard.tsx
 import { foundedRangeColor } from '@/helpers/campaignAmountColor';
+import Link from "next/link";
 import { CampaignCardProps, Campaign } from '@/types/campaign';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -43,9 +44,11 @@ const CampaignCard = ({ campaign, index }: CampaignCardProps) => {
           </div>
         </div>
 
-        <button className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-          Donate Now
-        </button>
+        <Link href={"/campaigns/" + campaign.id.toString()}>
+          <button className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            Donate Now
+          </button>
+        </Link>
       </div>
     </motion.div>
   );
