@@ -24,7 +24,7 @@ const mockCampaigns = Array.from({ length: 20 }, (_, i) => ({
     `Update ${i + 2}: First milestone reached!`
   ]
 }));
-
+// Test
 // Stripe Setup
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
