@@ -27,7 +27,7 @@ const AuthPage = () => {
         await signInWithEmailAndPassword(auth, data.email, data.password);
         toast.success('Successfully logged in!');
         // Redirect to campaign page
-        setTimeout(() => router.push('/campaigns'), 4000);
+        setTimeout(() => router.push('/dashboard'), 4000);
       } else {
         if (data.password !== data.confirmPassword) {
           toast.error('Passwords do not match!');
@@ -36,7 +36,7 @@ const AuthPage = () => {
         await createUserWithEmailAndPassword(auth, data.email, data.password);
         toast.success('Account created successfully!');
         // Redirect to campaign page
-        setTimeout(() => router.push('/campaigns'), 4000);
+        setTimeout(() => router.push('/dashboard'), 4000);
 
       }
     } catch (error: any) {
@@ -50,7 +50,7 @@ const AuthPage = () => {
       await signInWithPopup(auth, provider);
       toast.success('Google authentication successful!');
       // Redirect to campaign page
-      setTimeout(() => router.push('/campaigns'), 4000);
+      setTimeout(() => router.push('/dashboard'), 4000);
     } catch (error: any) {
       toast.error(error.message);
     }

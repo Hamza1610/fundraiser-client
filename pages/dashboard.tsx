@@ -1,21 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiEdit } from 'react-icons/fi';
+import { Donation, SavedCampaign } from '@/types/campaign';
 
-interface Donation {
-  id: number;
-  campaign: string;
-  amount: number;
-  date: string;
-  status: string;
-}
-
-interface SavedCampaign {
-  id: number;
-  title: string;
-  progress: number;
-  image: string;
-}
 
 const UserDashboard = () => {
   const [isEditing, setIsEditing] = useState(false);
