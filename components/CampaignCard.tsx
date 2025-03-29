@@ -1,7 +1,7 @@
 // components/CampaignCard.tsx
 import { foundedRangeColor } from '@/helpers/campaignAmountColor';
 import Link from "next/link";
-import { CampaignCardProps, Campaign } from '@/types/campaign';
+import { CampaignCardProps, Campaign } from '@/types/dataTypes';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
