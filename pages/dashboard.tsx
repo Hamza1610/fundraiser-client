@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiEdit } from 'react-icons/fi';
-import { Donation, SavedCampaign } from '@/types/campaign';
+import { Donation, SavedCampaign } from '@/types/dataTypes';
 
 
 const UserDashboard = () => {
