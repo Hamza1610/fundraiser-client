@@ -3,27 +3,31 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
-import { Elements } from '@stripe/react-stripe-js';
+import { Elements, PaymentElement } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useForm } from 'react-hook-form';
 import io from 'socket.io-client';
 import { LoadingSpinner } from '@/components/LoadingComponent';
 import { foundedRangeColor } from '@/helpers/campaignAmountColor';
+import apiClient from '@/config/axios';
+import axios from 'axios';
+import { Campaign } from '@/types/dataTypes';
+import { CampaignAPI, CommentAPI, DonationAPI } from '../../helpers/apiClient'
 
 // Mock Data (same as browsing page)
-const mockCampaigns = Array.from({ length: 20 }, (_, i) => ({
-  id: i + 1,
-  title: `Campaign ${i + 1}`,
-  description: `Support our ${['Education', 'Sports', 'Infrastructure'][i % 3]} initiative. This campaign aims to ${['build new facilities', 'provide scholarships', 'upgrade equipment'][i % 3]}.`,
-  category: ['Education', 'Sports', 'Infrastructure', 'Other'][i % 4],
-  goal: Math.floor(Math.random() * 50000 + 50000),
-  raised: Math.floor(Math.random() * 50000),
-  image: `https://picsum.photos/800/600?random=${i}`,
-  updates: [
-    `Update ${i + 1}: Campaign launched successfully!`,
-    `Update ${i + 2}: First milestone reached!`
-  ]
-}));
+// const mockCampaigns = Array.from({ length: 20 }, (_, i) => ({
+//   id: i + 1,
+//   title: `Campaign ${i + 1}`,
+//   description: `Support our ${['Education', 'Sports', 'Infrastructure'][i % 3]} initiative. This campaign aims to ${['build new facilities', 'provide scholarships', 'upgrade equipment'][i % 3]}.`,
+//   category: ['Education', 'Sports', 'Infrastructure', 'Other'][i % 4],
+//   goal: Math.floor(Math.random() * 50000 + 50000),
+//   raised: Math.floor(Math.random() * 50000),
+//   image: `https://picsum.photos/800/600?random=${i}`,
+//   updates: [
+//     `Update ${i + 1}: Campaign launched successfully!`,
+//     `Update ${i + 2}: First milestone reached!`
+//   ]
+// }));
 // Test
 // Stripe Setup
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
@@ -35,31 +39,97 @@ const CampaignDetails = () => {
   const [donations, setDonations] = useState<number>(0);
   const [comments, setComments] = useState<any[]>([]);
   const { register, handleSubmit, reset } = useForm();
-
+  const [ clientSecret, setClientSecret ] = useState<string>('');
+  // const options = {
+  //   // clientSecret: '{{CLIENT_SECRET}}',
+  //   clientSecret: clientSecret,
+  // };
+  
   // Simulate WebSocket updates
-  useEffect(() => {
-    const socket = io('http://localhost:3001'); // Replace with your WS server
+  // useEffect(() => {
+  //   const socket = io('http://localhost:3003'); // Replace with your WS server
     
-    socket.on('donationUpdate', (newDonation: number) => {
-      setDonations(prev => prev + newDonation);
-    });
+  //   socket.on('donationUpdate', (newDonation: number) => {
+  //     setDonations(prev => prev + newDonation);
+  //   });
 
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, []);
 
   // Load campaign data
   useEffect(() => {
     if (id) {
-      const foundCampaign = mockCampaigns.find(c => c.id === Number(id));
-      setCampaign(foundCampaign);
-      setDonations(foundCampaign?.raised || 0);
+      // const foundCampaign = mockCampaigns.find(c => c.id === Number(id));
+      // setCampaign(foundCampaign);
+      // setDonations(foundCampaign?.raised || 0);
+
+      const fetchCampaign = async () => {
+        try {
+          console.log('Fetching campaign with ID:', id);
+          // const response = await axios.get(`/api/campaigns/${id}`);
+          // const response = await apiClient.get(`/api/campaigns/67f290c819ab344c5961930b`);
+          // const foundCampaign: Campaign = response.data.data;
+          const foundCampaign = await CampaignAPI.getCampaign(id);
+          if (foundCampaign.success) {
+            const data = foundCampaign.data?.data;
+            console.log(" Found Campaign: ",  data);
+            setCampaign(data);
+            setDonations(data.raised || 0);
+            return
+          }
+          toast.error(`Error fetching campaign`);
+
+        } catch (error) {
+          console.error('Error fetching campaign:', error);
+          toast.error('Failed to fetch campaign data');
+          
+        }
+      }
+
+      const fetchComments = async () => {
+        try {
+          const comments = await CommentAPI.getComments(router.query.id as string);
+          
+          console.log("Found comments: ", comments);
+          
+          if(comments.success) {
+            const data = (await comments).data?.data;
+            console.log("Found Comments: ", data);
+            setComments(data)
+          }
+        } catch (error) {
+          console.error('Error fetching Comment:', error);
+          toast.error('Failed to fetch comment data');
+        }
+      }
+      
+      // Fetch campaign data from the server
+      const getClientKey = async () => {
+        try {
+          const response = await axios.get('/api/get-payment-intent-key');
+          if (response.data.clientSecret) {
+            setClientSecret(response.data.clientSecret);
+          } else {
+            toast.error('Client secret not found');
+          }
+        } catch (error) {
+          console.error('Axios Error:', error);
+          toast.error('Network error: Could not connect to server');
+        }
+      };
+      getClientKey();
+      fetchCampaign();
+      fetchComments();
     }
   }, [id]);
 
   // Handle comment submission
   const onSubmitComment = (data: any) => {
+  // save comment to database
+    CommentAPI.createComment(campaign._id, data.comment);
+
     setComments([...comments, {
       id: comments.length + 1,
       author: 'User',
@@ -148,14 +218,17 @@ const CampaignDetails = () => {
           </motion.div>
         </div>
 
-        {/* Donation Sidebar */}
+        {clientSecret && (
+        // {/* Donation Sidebar */}
         <div className="lg:col-span-1">
           <motion.div
             initial={{ x: 20 }}
             animate={{ x: 0 }}
             className="bg-white rounded-xl p-6 shadow-lg sticky top-8"
           >
+            {/* options={options} */}
             <Elements stripe={stripePromise}>
+              {/* <PaymentElement /> */}
               <div className="space-y-6">
                 <div className="text-center">
                   <h3 className="text-2xl font-bold text-blue-600">
@@ -185,6 +258,7 @@ const CampaignDetails = () => {
             </Elements>
           </motion.div>
         </div>
+        )}
       </div>
     </div>
   );
