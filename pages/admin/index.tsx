@@ -5,6 +5,9 @@ import { motion } from 'framer-motion';
 import { FiEdit, FiTrash, FiMenu, FiX, FiUser, FiDollarSign, FiSave } from 'react-icons/fi';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import { FiPlus } from 'react-icons/fi';
+import { CampaignAPI } from '@/helpers/apiClient';
 
 
 Chart.register(...registerables);
@@ -37,6 +40,56 @@ const AdminDashboard = () => {
   const [editingDonor, setEditingDonor] = useState<Donor | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ type: 'campaign' | 'donor'; id: number } | null>(null);
+
+
+  // Add this state for the create modal
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newCampaign, setNewCampaign] = useState<Omit<Campaign, 'id'>>({
+    title: '',
+    category: 'Education',
+    status: 'active',
+    goal: 10000,
+    raised: 0,
+    startDate: new Date(),
+    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+  });
+
+  // Add this function for creating a new campaign
+  const handleCreateCampaign = async () => {
+    try {
+      // Add a loading state if needed
+      // const response = await axios.post('/api/campaigns', newCampaign);
+      const response = await CampaignAPI.createCampaign(newCampaign);
+     // Assuming the API returns the created campaign with an ID
+     console.log("Restult: ", response);
+     let createdCampaign;
+
+     if (response.success) {
+      createdCampaign= response.data.data;
+     }
+      
+      // Add to the campaigns list
+      setCampaigns(prev => [...prev, createdCampaign]);
+      
+      // Close modal and show success message
+      setShowCreateModal(false);
+      toast.success('Campaign created successfully');
+      
+      // Reset form
+      setNewCampaign({
+        title: '',
+        category: 'Education',
+        status: 'active',
+        goal: 10000,
+        raised: 0,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      });
+    } catch (error) {
+      toast.error('Failed to create campaign');
+      console.error('Error creating campaign:', error);
+    }
+  };
 
   // Mock data initialization
   useEffect(() => {
@@ -167,7 +220,7 @@ const AdminDashboard = () => {
             className="space-y-6"
           >
             <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Campaign Management</h1>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {campaigns.map((campaign) => (
                 <div
@@ -461,6 +514,124 @@ const AdminDashboard = () => {
         draggable
         pauseOnHover
       />
+
+      {/* Floating Action Button */}
+      <button
+        onClick={() => setShowCreateModal(true)}
+        className="fixed right-6 bottom-6 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center hover:bg-blue-700 transition-colors z-30"
+      >
+        <FiPlus className="w-6 h-6" />
+      </button>
+
+      {/* Create Campaign Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">Create New Campaign</h3>
+              <button 
+                onClick={() => setShowCreateModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Title</label>
+                <input
+                  value={newCampaign.title}
+                  onChange={(e) => setNewCampaign({...newCampaign, title: e.target.value})}
+                  className="w-full p-2 border rounded-lg"
+                  placeholder="Campaign title"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Category</label>
+                <select
+                  value={newCampaign.category}
+                  onChange={(e) => setNewCampaign({...newCampaign, category: e.target.value})}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  <option value="Education">Education</option>
+                  <option value="Sports">Sports</option>
+                  <option value="Infrastructure">Infrastructure</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select
+                  value={newCampaign.status}
+                  onChange={(e) => setNewCampaign({...newCampaign, status: e.target.value as Campaign['status']})}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  <option value="active">Active</option>
+                  <option value="paused">Paused</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Goal Amount ($)</label>
+                <input
+                  type="number"
+                  value={newCampaign.goal}
+                  onChange={(e) => setNewCampaign({...newCampaign, goal: Number(e.target.value)})}
+                  className="w-full p-2 border rounded-lg"
+                  min="0"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Start Date</label>
+                  <input
+                    type="date"
+                    value={newCampaign.startDate.toISOString().split('T')[0]}
+                    onChange={(e) => setNewCampaign({
+                      ...newCampaign, 
+                      startDate: new Date(e.target.value)
+                    })}
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">End Date</label>
+                  <input
+                    type="date"
+                    value={newCampaign.endDate.toISOString().split('T')[0]}
+                    onChange={(e) => setNewCampaign({
+                      ...newCampaign, 
+                      endDate: new Date(e.target.value)
+                    })}
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-4 pt-2">
+                <button
+                  onClick={handleCreateCampaign}
+                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
+                >
+                  <FiSave className="w-4 h-4" /> Create Campaign
+                </button>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

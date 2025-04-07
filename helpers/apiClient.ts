@@ -16,7 +16,7 @@ apiClient.interceptors.request.use(config => {
 export const CampaignAPI = {
   createCampaign: async (data: CreateCampaignDTO) => {
     try {
-      const response = await apiClient.post<Campaign>('/campaigns', data);
+      const response = await axios.post<Campaign>('/api/campaigns', data);
       return { success: true, data: response.data };
     } catch (error) {
       return handleError(error);
@@ -25,18 +25,18 @@ export const CampaignAPI = {
 
   getCampaigns: async () => {
     try {
-      const response = await apiClient.get<Campaign[]>('/campaigns');
+      const response = await axios.get<Campaign[]>('/api/campaigns');
       console.log("Cmapaigns: ", response.data);
-      
+    
       return { success: true, data: response.data };
     } catch (error) {
       return handleError(error);
     }
   },
 
-  getCampaign: async (id: string) => {
+  getCampaign: async (id: string | string[] ) => {
     try {
-      const response = await apiClient.get<Campaign>(`/campaigns/${id}`);
+      const response = await axios.get<Campaign>(`/api/campaigns/${id}`);
       return { success: true, data: response.data };
     } catch (error) {
       return handleError(error);
@@ -45,7 +45,7 @@ export const CampaignAPI = {
 
   updateCampaign: async (id: string, data: UpdateCampaignDTO) => {
     try {
-      const response = await apiClient.put<Campaign>(`/campaigns/${id}`, data);
+      const response = await axios.put<Campaign>(`/api/campaigns/${id}`, data);
       return { success: true, data: response.data };
     } catch (error) {
       return handleError(error);
@@ -54,7 +54,7 @@ export const CampaignAPI = {
 
   deleteCampaign: async (id: string) => {
     try {
-      const response = await apiClient.delete<Campaign>(`/campaigns/${id}`);
+      const response = await axios.delete<Campaign>(`/api/campaigns/${id}`);
       return { success: true, data: response.data };
     } catch (error) {
       return handleError(error);
@@ -64,10 +64,10 @@ export const CampaignAPI = {
 
 // Comment API
 export const CommentAPI = {
-  createComment: async (campaignId: string, content: string) => {
+  createComment: async (campaignId: string | string[], content: string) => {
     try {
-      const response = await apiClient.post<Comment>(
-        `/comments/campaigns/${campaignId}/comments`,
+      const response = await axios.post<Comment>(
+        `/api/comments/campaigns/${campaignId}/comments`,
         { content }
       );
       return { success: true, data: response.data };
@@ -78,8 +78,8 @@ export const CommentAPI = {
 
   getComments: async (campaignId: string) => {
     try {
-      const response = await apiClient.get<Comment[]>(
-        `/comments/campaigns/${campaignId}/comments`
+      const response = await axios.get<Comment[]>(
+        `/api/comments/campaigns/${campaignId}/comments`
       );
       return { success: true, data: response.data };
     } catch (error) {
@@ -89,7 +89,7 @@ export const CommentAPI = {
 
   deleteComment: async (id: string) => {
     try {
-      const response = await apiClient.delete(`/comments/comments/${id}`);
+      const response = await axios.delete(`/api/comments/comments/${id}`);
       return { success: true, data: response.data };
     } catch (error) {
       return handleError(error);
@@ -101,8 +101,8 @@ export const CommentAPI = {
 export const DonationAPI = {
   createDonation: async (campaignId: string, amount: number) => {
     try {
-      const response = await apiClient.post<Donation>(
-        `/donations/campaigns/${campaignId}/donations`,
+      const response = await axios.post<Donation>(
+        `/api/donations/campaigns/${campaignId}/donations`,
         { amount }
       );
       return { success: true, data: response.data };
@@ -113,8 +113,8 @@ export const DonationAPI = {
 
   getDonations: async (campaignId: string) => {
     try {
-      const response = await apiClient.get<Donation[]>(
-        `/donations/campaigns/${campaignId}/donations`
+      const response = await axios.get<Donation[]>(
+        `/api/donations/campaigns/${campaignId}/donations`
       );
       return { success: true, data: response.data };
     } catch (error) {
@@ -124,8 +124,8 @@ export const DonationAPI = {
 
   updateDonationStatus: async (id: string, status: DonationStatus) => {
     try {
-      const response = await apiClient.put<Donation>(
-        `/donations/donations/${id}/status`,
+      const response = await axios.put<Donation>(
+        `/api/donations/donations/${id}/status`,
         { status }
       );
       return { success: true, data: response.data };
@@ -139,7 +139,7 @@ export const DonationAPI = {
 export const SavedCampaignAPI = {
   saveCampaign: async (campaignId: string) => {
     try {
-      const response = await apiClient.post<SavedCampaign>('/saved', {
+      const response = await axios.post<SavedCampaign>('/api/saved', {
         campaignId
       });
       return { success: true, data: response.data };
@@ -150,7 +150,7 @@ export const SavedCampaignAPI = {
 
   getSavedCampaigns: async () => {
     try {
-      const response = await apiClient.get<SavedCampaign[]>('/saved');
+      const response = await axios.get<SavedCampaign[]>('/api/saved');
       return { success: true, data: response.data };
     } catch (error) {
       return handleError(error);
@@ -159,7 +159,7 @@ export const SavedCampaignAPI = {
 
   removeSavedCampaign: async (id: string) => {
     try {
-      const response = await apiClient.delete<SavedCampaign>(`/saved/${id}`);
+      const response = await axios.delete<SavedCampaign>(`/api/saved/${id}`);
       return { success: true, data: response.data };
     } catch (error) {
       return handleError(error);
