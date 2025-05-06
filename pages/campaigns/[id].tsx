@@ -12,7 +12,7 @@ import { foundedRangeColor } from '@/helpers/campaignAmountColor';
 import apiClient from '@/config/axios';
 import axios from 'axios';
 import { Campaign } from '@/types/dataTypes';
-import { CampaignAPI, CommentAPI, DonationAPI } from '../../helpers/apiClient'
+import { CampaignAPI, CommentAPI, DonationAPI } from '../../helpers/apiClient/apiClient'
 
 // Mock Data (same as browsing page)
 // const mockCampaigns = Array.from({ length: 20 }, (_, i) => ({
@@ -39,11 +39,11 @@ const CampaignDetails = () => {
   const [donations, setDonations] = useState<number>(0);
   const [comments, setComments] = useState<any[]>([]);
   const { register, handleSubmit, reset } = useForm();
-  const [ clientSecret, setClientSecret ] = useState<string>('');
-  // const options = {
-  //   // clientSecret: '{{CLIENT_SECRET}}',
-  //   clientSecret: clientSecret,
-  // };
+  const [ clientSecret, setClientSecret ] = useState<string>(process.env.STRIPE_SECRET_KEY!);
+  const options = {
+    // clientSecret: '{{CLIENT_SECRET}}',
+    clientSecret: clientSecret,
+  };
   
   // Simulate WebSocket updates
   // useEffect(() => {
@@ -218,7 +218,7 @@ const CampaignDetails = () => {
           </motion.div>
         </div>
 
-        {clientSecret && (
+        {(clientSecret)  && (
         // {/* Donation Sidebar */}
         <div className="lg:col-span-1">
           <motion.div
@@ -227,8 +227,8 @@ const CampaignDetails = () => {
             className="bg-white rounded-xl p-6 shadow-lg sticky top-8"
           >
             {/* options={options} */}
-            <Elements stripe={stripePromise}>
-              {/* <PaymentElement /> */}
+            <Elements options={options} stripe={stripePromise}>
+              <PaymentElement />
               <div className="space-y-6">
                 <div className="text-center">
                   <h3 className="text-2xl font-bold text-blue-600">

@@ -7,28 +7,31 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import { FiPlus } from 'react-icons/fi';
-import { CampaignAPI } from '@/helpers/apiClient';
+import { CampaignAPI, DonationAPI } from '@/helpers/apiClient/apiClient';
+import { CampaignCardProps, CreateCampaignDTO, UpdateCampaignDTO } from '@/types/dataTypes';
+import CreateCampaignModal from '@/components/CreateCampaignModal';
+import { useRouter } from 'next/router';
 
 
 Chart.register(...registerables);
 
 interface Campaign {
-  id: number;
+  _id: string | number;
   title: string;
   category: string;
   status: 'active' | 'completed' | 'paused';
   goal: number;
   raised: number;
-  startDate: Date;
-  endDate: Date;
+
 }
 
 interface Donor {
-  id: number;
-  name: string;
-  email: string;
-  totalDonations: number;
-  lastDonation: Date;
+  _id: number;
+  donorName: string;
+  donorEmail: string;
+  donation: number;
+  title: string;
+  amount: number;
 }
 
 const AdminDashboard = () => {
@@ -39,82 +42,99 @@ const AdminDashboard = () => {
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
   const [editingDonor, setEditingDonor] = useState<Donor | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{ type: 'campaign' | 'donor'; id: number } | null>(null);
-
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'campaign' | 'donor'; _id: string | number } | null>(null);
+  const router = useRouter();
 
   // Add this state for the create modal
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newCampaign, setNewCampaign] = useState<Omit<Campaign, 'id'>>({
+  const [newCampaign, setNewCampaign] = useState<Omit<CreateCampaignDTO, 'id'>>({
     title: '',
+    description: '',
     category: 'Education',
-    status: 'active',
     goal: 10000,
-    raised: 0,
-    startDate: new Date(),
-    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+    image: '',
+    creatorId: ''
   });
 
   // Add this function for creating a new campaign
   const handleCreateCampaign = async () => {
     try {
       // Add a loading state if needed
-      // const response = await axios.post('/api/campaigns', newCampaign);
+      
       const response = await CampaignAPI.createCampaign(newCampaign);
      // Assuming the API returns the created campaign with an ID
      console.log("Restult: ", response);
-     let createdCampaign;
+     let createdCampaign: Campaign;
 
      if (response.success) {
-      createdCampaign= response.data.data;
-     }
+      createdCampaign = response.data?.data;
+      console.log("Created: Campaign:", createdCampaign);
       
       // Add to the campaigns list
       setCampaigns(prev => [...prev, createdCampaign]);
+     }
       
-      // Close modal and show success message
-      setShowCreateModal(false);
-      toast.success('Campaign created successfully');
       
-      // Reset form
-      setNewCampaign({
-        title: '',
-        category: 'Education',
-        status: 'active',
-        goal: 10000,
-        raised: 0,
-        startDate: new Date(),
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-      });
+    // Close modal and show success message
+    setShowCreateModal(false);
+    toast.success('Campaign created successfully');
+    
     } catch (error) {
       toast.error('Failed to create campaign');
       console.error('Error creating campaign:', error);
     }
   };
 
+  // Function to handle when a campaign is created successfully
+  const handleCampaignCreated = () => {
+    // Refetch campaigns to update the list
+    handleCreateCampaign();
+    router.reload();
+
+        // Reset form
+    setNewCampaign({
+      title: '',
+      description: '',
+      category: 'Education',
+      goal: 10000,
+      image: '',
+      creatorId: ''
+    });
+  };
   // Mock data initialization
   useEffect(() => {
     // Update the mock campaigns initialization
-    const mockCampaigns = Array.from({ length: 15 }, (_, i) => ({
-      id: i + 1,
-      title: `Campaign ${i + 1}`,
-      category: ['Education', 'Sports', 'Infrastructure'][i % 3],
-      status: ['active', 'completed', 'paused'][i % 3] as Campaign['status'], // Add type assertion
-      goal: Math.floor(Math.random() * 50000 + 50000),
-      raised: Math.floor(Math.random() * 50000),
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 2592000000)
-    }));
+    // const mockCampaigns: Campaign[] = Array.from({ length: 15 }, (_, i) => ({
+    //   id: i + 1,
+    //   title: `Campaign ${i + 1}`,
+    //   category: ['Education', 'Sports', 'Infrastructure'][i % 3],
+    //   status: ['active', 'completed', 'paused'][i % 3] as Campaign['status'], // Add type assertion
+    //   goal: Math.floor(Math.random() * 50000 + 50000),
+    //   raised: Math.floor(Math.random() * 50000),
+    // }));
 
-    const mockDonors = Array.from({ length: 50 }, (_, i) => ({
-      id: i + 1,
-      name: `Donor ${i + 1}`,
-      email: `donor${i + 1}@campus.edu`,
-      totalDonations: Math.floor(Math.random() * 5000),
-      lastDonation: new Date()
-    }));
+    const getCampaigns = async () => {
+      const res = await CampaignAPI.getCreatorCampaigns();
+      const userCampaigns = res.success ? res.data.data : [];
+      setCampaigns(userCampaigns);      
+    }
 
-    setCampaigns(mockCampaigns);
-    setDonors(mockDonors);
+    const getDonors = async () => {
+      const res = await DonationAPI.getDonationsByCreator();
+      const userCampaignDonations = res.success ? res.data.data : [];
+      setDonors(userCampaignDonations);
+    }
+
+    // const mockDonors = Array.from({ length: 50 }, (_, i) => ({
+    //   id: i + 1,
+    //   name: `Donor ${i + 1}`,
+    //   email: `donor${i + 1}@campus.edu`,
+    //   totalDonations: Math.floor(Math.random() * 5000),
+    //   lastDonation: new Date()
+    // }));
+
+    getCampaigns();
+    getDonors();
   }, []);
 
   // Chart data configurations
@@ -137,15 +157,22 @@ const AdminDashboard = () => {
     }]
   };
 
+  console.log("Gotten user campaigns: ", campaigns)
+
   // CRUD Operations
   const handleDelete = () => {
     if (!deleteTarget) return;
 
     if (deleteTarget.type === 'campaign') {
-      setCampaigns(prev => prev.filter(c => c.id !== deleteTarget.id));
+      const deleteCampaign = async () => {
+        const res = await CampaignAPI.deleteCampaign(deleteTarget._id);
+        setCampaigns(prev => prev.filter(c => c._id !== deleteTarget._id));
+      }
+
+      deleteCampaign();
       toast.success('Campaign deleted successfully');
     } else {
-      setDonors(prev => prev.filter(d => d.id !== deleteTarget.id));
+      setDonors(prev => prev.filter(d => d._id !== deleteTarget._id));
       toast.success('Donor deleted successfully');
     }
 
@@ -156,9 +183,14 @@ const AdminDashboard = () => {
   const handleCampaignUpdate = () => {
     if (!editingCampaign) return;
 
-    setCampaigns(prev =>
-      prev.map(c => c.id === editingCampaign.id ? editingCampaign : c)
-    );
+    const updateCampaign = async () => {
+      const res = await CampaignAPI.updateCampaign(editingCampaign._id, editingCampaign);
+      setCampaigns(prev =>
+        prev.map(c => c._id === editingCampaign._id ? editingCampaign : c)
+      );
+    }
+    
+    updateCampaign();
     toast.success('Campaign updated successfully');
     setEditingCampaign(null);
   };
@@ -167,7 +199,7 @@ const AdminDashboard = () => {
     if (!editingDonor) return;
 
     setDonors(prev =>
-      prev.map(d => d.id === editingDonor.id ? editingDonor : d)
+      prev.map(d => d._id === editingDonor._id ? editingDonor : d)
     );
     toast.success('Donor updated successfully');
     setEditingDonor(null);
@@ -224,7 +256,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {campaigns.map((campaign) => (
                 <div
-                  key={campaign.id}
+                  key={campaign._id}
                   className="bg-white rounded-xl shadow-sm p-4 sm:p-6 hover:shadow-md transition-shadow"
                 >
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3 sm:mb-4">
@@ -259,7 +291,7 @@ const AdminDashboard = () => {
                       </button>
                       <button
                         onClick={() => {
-                          setDeleteTarget({ type: 'campaign', id: campaign.id });
+                          setDeleteTarget({ type: 'campaign', _id: campaign._id });
                           setShowDeleteModal(true);
                         }}
                         className="flex-1 flex items-center justify-center gap-1 sm:gap-2 text-sm bg-red-600 text-white p-2 sm:py-2 rounded-lg hover:bg-red-700"
@@ -289,19 +321,19 @@ const AdminDashboard = () => {
                     <tr className="text-left border-b text-sm">
                       <th className="pb-2 sm:pb-3">Donor</th>
                       <th className="pb-2 sm:pb-3">Email</th>
-                      <th className="pb-2 sm:pb-3">Total Donations</th>
-                      <th className="pb-2 sm:pb-3">Last Donation</th>
+                      <th className="pb-2 sm:pb-3">Donated</th>
+                      <th className="pb-2 sm:pb-3">title</th>
                       <th className="pb-2 sm:pb-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {donors.map((donor) => (
-                      <tr key={donor.id} className="border-b hover:bg-gray-50 text-sm">
-                        <td className="py-3 sm:py-4">{donor.name}</td>
-                        <td className="break-all">{donor.email}</td>
-                        <td>${donor.totalDonations.toLocaleString()}</td>
+                      <tr key={donor._id} className="border-b hover:bg-gray-50 text-sm">
+                        <td className="py-3 sm:py-4">{donor.donorName}</td>
+                        <td className="break-all">{donor.donorEmail}</td>
+                        <td>${donor.amount.toLocaleString()}</td>
                         <td className="whitespace-nowrap">
-                          {donor.lastDonation.toLocaleDateString()}
+                          {donor.title}
                         </td>
                         <td className="flex gap-2 py-3 sm:py-4">
                           <button
@@ -312,7 +344,7 @@ const AdminDashboard = () => {
                           </button>
                           <button
                             onClick={() => {
-                              setDeleteTarget({ type: 'donor', id: donor.id });
+                              setDeleteTarget({ type: 'donor', _id: donor._id });
                               setShowDeleteModal(true);
                             }}
                             className="text-red-600 hover:text-red-800 p-1 sm:p-2 hover:bg-red-100 rounded-lg"
@@ -442,16 +474,16 @@ const AdminDashboard = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1">Name</label>
                   <input
-                    value={editingDonor.name}
-                    onChange={(e) => setEditingDonor({...editingDonor, name: e.target.value})}
+                    value={editingDonor.donorName}
+                    onChange={(e) => setEditingDonor({...editingDonor, donorName: e.target.value})}
                     className="w-full p-2 border rounded-lg"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Email</label>
                   <input
-                    value={editingDonor.email}
-                    onChange={(e) => setEditingDonor({...editingDonor, email: e.target.value})}
+                    value={editingDonor.donorEmail}
+                    onChange={(e) => setEditingDonor({...editingDonor, donorEmail: e.target.value})}
                     className="w-full p-2 border rounded-lg"
                     type="email"
                   />
@@ -524,114 +556,13 @@ const AdminDashboard = () => {
       </button>
 
       {/* Create Campaign Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Create New Campaign</h3>
-              <button 
-                onClick={() => setShowCreateModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <FiX className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Title</label>
-                <input
-                  value={newCampaign.title}
-                  onChange={(e) => setNewCampaign({...newCampaign, title: e.target.value})}
-                  className="w-full p-2 border rounded-lg"
-                  placeholder="Campaign title"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Category</label>
-                <select
-                  value={newCampaign.category}
-                  onChange={(e) => setNewCampaign({...newCampaign, category: e.target.value})}
-                  className="w-full p-2 border rounded-lg"
-                >
-                  <option value="Education">Education</option>
-                  <option value="Sports">Sports</option>
-                  <option value="Infrastructure">Infrastructure</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Status</label>
-                <select
-                  value={newCampaign.status}
-                  onChange={(e) => setNewCampaign({...newCampaign, status: e.target.value as Campaign['status']})}
-                  className="w-full p-2 border rounded-lg"
-                >
-                  <option value="active">Active</option>
-                  <option value="paused">Paused</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Goal Amount ($)</label>
-                <input
-                  type="number"
-                  value={newCampaign.goal}
-                  onChange={(e) => setNewCampaign({...newCampaign, goal: Number(e.target.value)})}
-                  className="w-full p-2 border rounded-lg"
-                  min="0"
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Start Date</label>
-                  <input
-                    type="date"
-                    value={newCampaign.startDate.toISOString().split('T')[0]}
-                    onChange={(e) => setNewCampaign({
-                      ...newCampaign, 
-                      startDate: new Date(e.target.value)
-                    })}
-                    className="w-full p-2 border rounded-lg"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">End Date</label>
-                  <input
-                    type="date"
-                    value={newCampaign.endDate.toISOString().split('T')[0]}
-                    onChange={(e) => setNewCampaign({
-                      ...newCampaign, 
-                      endDate: new Date(e.target.value)
-                    })}
-                    className="w-full p-2 border rounded-lg"
-                  />
-                </div>
-              </div>
-              
-              <div className="flex gap-4 pt-2">
-                <button
-                  onClick={handleCreateCampaign}
-                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
-                >
-                  <FiSave className="w-4 h-4" /> Create Campaign
-                </button>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Render Create Campaign Modal */}
+      <CreateCampaignModal
+        showCreateModal={showCreateModal}
+        setShowCreateModal={setShowCreateModal}
+        onCampaignCreated={handleCampaignCreated}
+      />
+
     </div>
   );
 };

@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { FiSearch } from 'react-icons/fi';
 import CampaignCard from '@/components/CampaignCard';
 import { Campaign } from '@/types/dataTypes';
-import { CampaignAPI } from '@/helpers/apiClient';
+import { CampaignAPI } from '@/helpers/apiClient/apiClient';
 
 const CampaignBrowsingPage = () => {
   const [allCampaigns, setAllCampaigns] = useState([]);
