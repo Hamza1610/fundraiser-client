@@ -3,8 +3,8 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
-import { Elements, PaymentElement } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
+// import { Elements, PaymentElement } from '@stripe/react-stripe-js';
+// import { loadStripe } from '@stripe/stripe-js';
 import { useForm } from 'react-hook-form';
 import io from 'socket.io-client';
 import { LoadingSpinner } from '@/components/LoadingComponent';
@@ -13,6 +13,11 @@ import apiClient from '@/config/axios';
 import axios from 'axios';
 import { Campaign } from '@/types/dataTypes';
 import { CampaignAPI, CommentAPI, DonationAPI } from '../../helpers/apiClient/apiClient'
+import { PaystackButtonWrapper } from '@/components/PaymentButton';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { app } from '@/config/firebase';
+// Add at top
+
 
 // Mock Data (same as browsing page)
 // const mockCampaigns = Array.from({ length: 20 }, (_, i) => ({
@@ -30,7 +35,7 @@ import { CampaignAPI, CommentAPI, DonationAPI } from '../../helpers/apiClient/ap
 // }));
 // Test
 // Stripe Setup
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
+// const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
 const CampaignDetails = () => {
   const router = useRouter();
@@ -40,10 +45,8 @@ const CampaignDetails = () => {
   const [comments, setComments] = useState<any[]>([]);
   const { register, handleSubmit, reset } = useForm();
   const [ clientSecret, setClientSecret ] = useState<string>(process.env.STRIPE_SECRET_KEY!);
-  const options = {
-    // clientSecret: '{{CLIENT_SECRET}}',
-    clientSecret: clientSecret,
-  };
+  const [donationAmount, setDonationAmount] = useState<number>(0);
+  const [user, setUser] = useState<any>(null);
   
   // Simulate WebSocket updates
   // useEffect(() => {
@@ -124,6 +127,18 @@ const CampaignDetails = () => {
       fetchComments();
     }
   }, [id]);
+
+  // Add this useEffect to get the current user
+  useEffect(() => {
+    const auth = getAuth(app);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Handle comment submission
   const onSubmitComment = (data: any) => {
@@ -221,12 +236,12 @@ const CampaignDetails = () => {
         {(clientSecret)  && (
         // {/* Donation Sidebar */}
         <div className="lg:col-span-1">
-          <motion.div
+          {/* <motion.div
             initial={{ x: 20 }}
             animate={{ x: 0 }}
             className="bg-white rounded-xl p-6 shadow-lg sticky top-8"
           >
-            {/* options={options} */}
+
             <Elements options={options} stripe={stripePromise}>
               <PaymentElement />
               <div className="space-y-6">
@@ -256,7 +271,76 @@ const CampaignDetails = () => {
                 </div>
               </div>
             </Elements>
-          </motion.div>
+          </motion.div> */}
+          {/* Donation Sidebar */}
+<div className="lg:col-span-1">
+  <motion.div
+    initial={{ x: 20 }}
+    animate={{ x: 0 }}
+    className="bg-white rounded-xl p-6 shadow-lg sticky top-8"
+  >
+    <div className="space-y-6">
+      <div className="text-center">
+        <h3 className="text-2xl font-bold text-blue-600">
+          ${(campaign.raised + donations).toLocaleString()}
+        </h3>
+        <p className="text-gray-600">raised of ${campaign.goal.toLocaleString()} goal</p>
+      </div>
+
+      {/* Add this before the donation form */}
+      {!user ? (
+        <div className="text-center p-4 bg-yellow-50 rounded-lg">
+          <p className="text-yellow-800">Please log in to make a donation</p>
+          <button 
+            onClick={() => router.push('/auth')}
+            className="mt-2 text-blue-600 hover:text-blue-800"
+          >
+            Log in
+          </button>
+        </div>
+      ) : (
+        // Your existing donation form
+        <div className="space-y-4">
+          <input
+            type="number"
+            placeholder="Enter amount"
+            className="w-full p-3 border rounded-lg"
+            value={donationAmount}
+            onChange={(e) => setDonationAmount(Number(e.target.value))}
+          />
+          <PaystackButtonWrapper
+            amount={donationAmount}
+            email={user?.email || "donor@example.com"}
+            campaignId={campaign._id}
+            onSuccess={async (ref) => {
+              try {
+                // Update campaign fund
+                await CampaignAPI.updateCampaignFund(campaign._id, donationAmount);
+
+                await DonationAPI.createDonation({
+                  amount: donationAmount,
+                  campaignId: campaign._id,
+                  creatorId: campaign.creatorId,
+                  reference: ref.reference,
+                });
+                toast.success('Donation successful!');
+                setDonations(prev => prev + donationAmount);
+              } catch (error) {
+                console.error('Error processing donation:', error);
+                toast.error('Failed to process donation');
+              }
+            }}
+          />
+        </div>
+      )}
+
+      <div className="text-sm text-gray-500">
+        <p>Secure payment powered by Paystack</p>
+      </div>
+    </div>
+  </motion.div>
+</div>
+
         </div>
         )}
       </div>

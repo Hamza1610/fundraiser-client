@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { use, useState } from 'react';
 import { useForm, UseFormRegister } from 'react-hook-form';
-import { auth } from '../config/firebase'; // Configure Firebase first
+import { auth, setFirebaseUID } from '../config/firebase'; // Configure Firebase first
 import { toast, ToastContainer } from 'react-toastify';
 import { useRouter } from 'next/router'
 import { FcGoogle } from 'react-icons/fc';
@@ -9,10 +9,13 @@ import {
   createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  updateProfile
 } from 'firebase/auth';
 import 'react-toastify/dist/ReactToastify.css';
 import { FormData } from '@/types/auth';
+import axios from 'axios';
+import apiClient from '@/config/axios';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -20,11 +23,41 @@ const AuthPage = () => {
   const [resetEmail, setResetEmail] = useState('');
   const [showResetModal, setShowResetModal] = useState(false);
   const router = useRouter()
+
+  const signUserToDatabase = async (user: any) => {
+    if (user.displayName) {
+      await updateProfile(user, { displayName: user.displayName });
+    }
+        
+    try {
+      const result = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+      });
+      
+      if (result.data.user) {
+        setFirebaseUID(user.uid); // Set Firebase UID in cookies
+        toast.success('Account created successfully!');
+        // Redirect to campaign page
+        setTimeout(() => router.push('/dashboard'), 4000);
+      } 
+    } catch (error) {
+      console.error('Error creating user in database:', error);
+      toast.error('Error creating user in database');
+
+    }
+  }
   // Firebase Auth Handlers
   const handleEmailPasswordAuth = async (data: FormData) => {
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, data.email, data.password);
+        const credential = await signInWithEmailAndPassword(auth, data.email, data.password);
+        const user = credential.user;
+        // signUserToDatabase(user);
+        // save the uid to the cookie to be retrieved later
+    
         toast.success('Successfully logged in!');
         // Redirect to campaign page
         setTimeout(() => router.push('/dashboard'), 4000);
@@ -33,21 +66,26 @@ const AuthPage = () => {
           toast.error('Passwords do not match!');
           return;
         }
-        await createUserWithEmailAndPassword(auth, data.email, data.password);
-        toast.success('Account created successfully!');
-        // Redirect to campaign page
-        setTimeout(() => router.push('/dashboard'), 4000);
+        const credential = await createUserWithEmailAndPassword(auth, data.email, data.password);
 
+        const user = credential.user;
+        console.log("Getting USER: ", user)
+        signUserToDatabase(user);
       }
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+        } catch (error: any) {
+          toast.error(error.message);
+        }
+
   };
 
   const handleGoogleAuth = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const credential = await signInWithPopup(auth, provider);
+
+      const user = credential.user;
+      console.log("Getting USER: ", user);
+      signUserToDatabase(user);
       toast.success('Google authentication successful!');
       // Redirect to campaign page
       setTimeout(() => router.push('/dashboard'), 4000);
