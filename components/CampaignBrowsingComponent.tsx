@@ -1,3 +1,8 @@
+'use client';
+
+interface Props {
+  campaignsFunc: () => Promise<Campaign[]>;
+}
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -6,18 +11,22 @@ import { FiSearch } from 'react-icons/fi';
 import CampaignCard from '@/components/CampaignCard';
 import { Campaign } from '@/types/dataTypes';
 
-// Define props interface
-interface CampaignBrowsingPageProps {
-  initialCampaigns: Campaign[];
-}
+export default function CampaignBrowsingComponent({ campaignsFunc }: Props) {
+  const [allCampaigns, setAllCampaigns] = useState<Campaign[]>([]);
+  const [loading, setLoading] = useState(true);
 
-// This component uses client-side React hooks
-const CampaignBrowsingComponent = ({ initialCampaigns }: CampaignBrowsingPageProps) => {
-  const [items, setItems] = useState<Campaign[]>(initialCampaigns.slice(0, 8));
+  useEffect(() => {
+    campaignsFunc()
+      .then(data => {
+        setAllCampaigns(data ?? []);
+      })
+      .finally(() => setLoading(false));
+  }, [campaignsFunc]);
+
+  const [items, setItems] = useState<Campaign[]>(allCampaigns.slice(0, 8));
   const [hasMore, setHasMore] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [allCampaigns, setAllCampaigns] = useState<Campaign[]>(initialCampaigns);
 
   // Filtered campaigns
   const filteredCampaigns = allCampaigns.filter(campaign => {
@@ -47,6 +56,8 @@ const CampaignBrowsingComponent = ({ initialCampaigns }: CampaignBrowsingPagePro
 
     return () => clearTimeout(debounce);
   }, [searchTerm, selectedCategory, filteredCampaigns]);
+
+  if (loading) return <div>Loading campaigns…</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -87,7 +98,7 @@ const CampaignBrowsingComponent = ({ initialCampaigns }: CampaignBrowsingPagePro
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((campaign, index) => (
             <CampaignCard
-                key={campaign.id}
+                key={campaign._id}
                 campaign={campaign}
                 index={index}
             />
@@ -97,5 +108,3 @@ const CampaignBrowsingComponent = ({ initialCampaigns }: CampaignBrowsingPagePro
     </div>
   );
 };
-
-export default CampaignBrowsingComponent;
