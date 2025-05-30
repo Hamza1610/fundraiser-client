@@ -44,7 +44,7 @@ const CampaignCard = ({ campaign, index }: CampaignCardProps) => {
           </div>
         </div>
 
-        <Link href={"/campaigns/" + campaign.id.toString()}>
+        <Link href={"/campaigns/" + campaign._id.toString()}>
           <button className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
             Donate Now
           </button>
