@@ -140,7 +140,7 @@ const AuthPage = () => {
               <label className="block text-gray-700 mb-2">Name</label>
               <input
                 {...register('name', { required: true })}
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500"
                 placeholder="Enter your name"
               />
             </div>
@@ -151,7 +151,7 @@ const AuthPage = () => {
             <input
               {...register('email', { required: true })}
               type="email"
-              className="w-full p-3 border border-gray-300 rounded-lg"
+              className="w-full p-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500"
               placeholder="Enter your email"
             />
           </div>
@@ -164,7 +164,7 @@ const AuthPage = () => {
                 minLength: 6 
               })}
               type="password"
-              className="w-full p-3 border border-gray-300 rounded-lg"
+              className="w-full p-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500"
               placeholder="Enter password"
             />
           </div>
@@ -178,7 +178,7 @@ const AuthPage = () => {
                   validate: value => value === watch('password')
                 })}
                 type="password"
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500"
                 placeholder="Confirm password"
               />
             </div>
@@ -202,7 +202,7 @@ const AuthPage = () => {
           </button>
         </form>
 
-        <p className="text-center mt-6">
+        <p className="text-center mt-6 text-gray-700">
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <button
             onClick={() => setIsLogin(!isLogin)}
@@ -223,7 +223,7 @@ const AuthPage = () => {
               value={resetEmail}
               onChange={(e) => setResetEmail(e.target.value)}
               placeholder="Enter your email"
-              className="w-full p-3 border mb-4 rounded-lg"
+              className="w-full p-3 border mb-4 rounded-lg text-gray-900 placeholder-gray-500"
             />
             <div className="flex gap-4">
               <button
