@@ -17,11 +17,11 @@ apiClient.interceptors.request.use(config => {
 export const CampaignAPI = {
   createCampaign: async (data: FormData) => {
     try {
-      const response = await axios.post<Campaign>('/api/campaigns', data);
-
-      // headers: {
-      //   'Content-Type': 'multipart/form-data'
-      // }
+      const response = await axios.post<Campaign>('/api/campaigns', data, {
+        // headers: {
+        //   'Content-Type': 'multipart/form-data'
+        // }
+      });
       return { success: true, data: response.data };
     } catch (error) {
       return handleError(error);

@@ -4,9 +4,8 @@ interface Props {
   campaignsFunc: () => Promise<Campaign[]>;
 }
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import InfiniteScroll from 'react-infinite-scroll-component';
 import { FiSearch } from 'react-icons/fi';
 import CampaignCard from '@/components/CampaignCard';
 import { Campaign } from '@/types/dataTypes';
@@ -14,7 +13,10 @@ import { Campaign } from '@/types/dataTypes';
 export default function CampaignBrowsingComponent({ campaignsFunc }: Props) {
   const [allCampaigns, setAllCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
+  // Fetch campaigns
   useEffect(() => {
     campaignsFunc()
       .then(data => {
@@ -23,39 +25,32 @@ export default function CampaignBrowsingComponent({ campaignsFunc }: Props) {
       .finally(() => setLoading(false));
   }, [campaignsFunc]);
 
-  const [items, setItems] = useState<Campaign[]>(allCampaigns.slice(0, 8));
-  const [hasMore, setHasMore] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  // Filtered campaigns using useMemo for better performance
+  const filteredCampaigns = useMemo(() => {
+    return allCampaigns.filter(campaign => {
+      // Search term filtering
+      const searchTermLower = searchTerm.toLowerCase().trim();
+      const matchesSearch = searchTermLower === '' || 
+        campaign.title.toLowerCase().includes(searchTermLower) ||
+        campaign.description.toLowerCase().includes(searchTermLower);
 
-  // Filtered campaigns
-  const filteredCampaigns = allCampaigns.filter(campaign => {
-    const matchesSearch = campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || campaign.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+      // Category filtering
+      const matchesCategory = selectedCategory === 'All' || 
+        campaign.category.toLowerCase() === selectedCategory.toLowerCase();
 
-  // Load more data for infinite scroll
-  const loadMore = () => {
-    setTimeout(() => {
-      setItems(prev => [
-        ...prev,
-        ...filteredCampaigns.slice(prev.length, prev.length + 4)
-      ]);
-      if (items.length >= filteredCampaigns.length) setHasMore(false);
-    }, 1000);
+      return matchesSearch && matchesCategory;
+    });
+  }, [allCampaigns, searchTerm, selectedCategory]);
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
   };
 
-  // Debounce search
-  useEffect(() => {
-    const debounce = setTimeout(() => {
-      setItems(filteredCampaigns.slice(0, 8));
-      setHasMore(filteredCampaigns.length > 8);
-    }, 300);
-
-    return () => clearTimeout(debounce);
-  }, [searchTerm, selectedCategory, filteredCampaigns]);
+  // Handle category change
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCategory(e.target.value);
+  };
 
   if (loading) return <div>Loading campaigns…</div>;
 
@@ -67,44 +62,42 @@ export default function CampaignBrowsingComponent({ campaignsFunc }: Props) {
           <input
             type="text"
             placeholder="Search campaigns..."
-            className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
           />
           <FiSearch className="absolute left-4 top-4 text-gray-400 text-xl" />
         </div>
         
         <select
-          className="w-full md:w-48 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full md:w-48 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
           value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
+          onChange={handleCategoryChange}
         >
-          <option value="All">All Categories</option>
-          <option value="Education">Education</option>
-          <option value="Sports">Sports</option>
-          <option value="Infrastructure">Infrastructure</option>
-          <option value="Other">Other</option>
+          <option value="All" className="text-gray-900">All Categories</option>
+          <option value="Education" className="text-gray-900">Education</option>
+          <option value="Sports" className="text-gray-900">Sports</option>
+          <option value="Infrastructure" className="text-gray-900">Infrastructure</option>
+          <option value="Other" className="text-gray-900">Other</option>
         </select>
       </div>
 
       {/* Campaign Grid */}
-      <InfiniteScroll
-        dataLength={items.length}
-        next={loadMore}
-        hasMore={hasMore}
-        loader={<div className="text-center py-8 text-gray-500">Loading more campaigns...</div>}
-        endMessage={<p className="text-center py-8 text-gray-500">No more campaigns to show</p>}
-      >
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((campaign, index) => (
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredCampaigns.length > 0 ? (
+          filteredCampaigns.map((campaign, index) => (
             <CampaignCard
-                key={campaign._id}
-                campaign={campaign}
-                index={index}
+              key={campaign._id}
+              campaign={campaign}
+              index={index}
             />
-          ))}
-        </div>
-      </InfiniteScroll>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-8 text-gray-500">
+            No campaigns found matching your search criteria
+          </div>
+        )}
+      </div>
     </div>
   );
-};
+}
