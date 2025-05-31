@@ -1,15 +1,14 @@
+// 
+
+
+
+
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 
 const LandingPage = () => {
-  const featuredCampaigns = [
-    { id: 1, title: 'New Library Fund', progress: 65, goal: '$50,000' },
-    { id: 2, title: 'Student Scholarship', progress: 40, goal: '$30,000' },
-    { id: 3, title: 'Sports Facility', progress: 85, goal: '$75,000' },
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -39,9 +38,8 @@ const LandingPage = () => {
             <Link href="/campaigns">
               <motion.button
                 whileHover={{ scale: 1.05 }}
-                className="bg-yellow-400 text-blue-900 px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full 
-                          text-sm sm:text-base md:text-lg font-semibold shadow-lg whitespace-nowrap
-                          min-w-[160px] sm:min-w-0"
+                className="bg-yellow-400 text-blue-900 px-6 py-3 rounded-full 
+                          text-lg font-semibold shadow-lg"
               >
                 Explore Campaigns
               </motion.button>
@@ -50,9 +48,8 @@ const LandingPage = () => {
             <Link href="/auth">
               <motion.button
                 whileHover={{ scale: 1.05 }}
-                className="bg-white text-blue-900 px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full 
-                          text-sm sm:text-base md:text-lg font-semibold shadow-lg whitespace-nowrap
-                          min-w-[160px] sm:min-w-0"
+                className="bg-white text-blue-900 px-6 py-3 rounded-full 
+                          text-lg font-semibold shadow-lg"
               >
                 Login/Sign Up
               </motion.button>
@@ -61,55 +58,85 @@ const LandingPage = () => {
         </motion.div>
       </section>
 
-      {/* Featured Campaigns */}
-      <section className="py-16 px-4 md:px-8 lg:px-16">
-        <h2 className="text-3xl font-bold text-center text-blue-900 mb-12">
-          Featured Campaigns
-        </h2>
+      {/* About Section */}
+      <section className="py-20 px-4 md:px-8 lg:px-16 bg-white text-center">
+        <h2 className="text-3xl font-bold text-blue-900 mb-6">About CampusFund</h2>
+        <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+          CampusFund is a platform built to empower university communities to raise funds for important projects. 
+          Whether it's building new facilities, supporting scholarships, or launching innovative ideas every campaign counts.
+        </p>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {featuredCampaigns.map((campaign, index) => (
-            <motion.div
-              key={campaign.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.2 }}
-              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-            >
-              <div className="h-48 bg-blue-100 relative">
-                <Image
-                  src={`/campaign-${campaign.id}.jpg`}
-                  alt={campaign.title}
-                  layout="fill"
-                  objectFit="cover"
-                />
-              </div>
-              
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-blue-900 mb-2">
-                  {campaign.title}
-                </h3>
-                
-                <div className="mb-4">
-                  <div className="h-2 bg-gray-200 rounded-full">
-                    <div 
-                      className="h-2 bg-yellow-400 rounded-full"
-                      style={{ width: `${campaign.progress}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-sm mt-2">
-                    <span>{campaign.progress}% Funded</span>
-                    <span>Goal: {campaign.goal}</span>
-                  </div>
-                </div>
-
-                <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                  Donate Now
-                </button>
-              </div>
-            </motion.div>
+      {/* How It Works Section */}
+      <section className="py-20 px-4 md:px-8 lg:px-16 bg-gray-100 text-center">
+        <h2 className="text-3xl font-bold text-blue-900 mb-12">How It Works</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto text-left">
+          {[
+            {
+              title: 'Start a Campaign',
+              description: 'Create a campaign to raise funds for a specific cause on your campus.',
+              icon: '🎯',
+            },
+            {
+              title: 'Share with Community',
+              description: 'Promote your campaign through social media and student groups.',
+              icon: '📣',
+            },
+            {
+              title: 'Reach Your Goal',
+              description: 'Collect donations, track progress, and celebrate your success.',
+              icon: '🏆',
+            },
+          ].map((step, i) => (
+            <div key={i} className="bg-white p-6 rounded-xl shadow-md text-center">
+              <div className="text-4xl mb-4">{step.icon}</div>
+              <h3 className="text-xl font-bold text-blue-800 mb-2">{step.title}</h3>
+              <p className="text-gray-600">{step.description}</p>
+            </div>
           ))}
         </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-20 px-4 md:px-8 lg:px-16 bg-white text-center">
+        <h2 className="text-3xl font-bold text-blue-900 mb-12">What Our Supporters Say</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {[
+            {
+              quote: "CampusFund helped us renovate our old library. The community support was overwhelming!",
+              name: "Sarah L.",
+              title: "Student Council President",
+            },
+            {
+              quote: "We raised $20,000 for new lab equipment in just 3 weeks. Amazing platform!",
+              name: "Dr. Thomas K.",
+              title: "Chemistry Department Head",
+            },
+          ].map((testimonial, index) => (
+            <div key={index} className="bg-gray-100 p-6 rounded-xl shadow">
+              <p className="text-gray-700 italic mb-4">"{testimonial.quote}"</p>
+              <p className="font-bold text-blue-900">{testimonial.name}</p>
+              <p className="text-sm text-gray-600">{testimonial.title}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Call to Action */}
+      <section className="py-20 px-4 md:px-8 lg:px-16 bg-blue-900 text-white text-center">
+        <h2 className="text-3xl font-bold mb-6">Ready to Make a Difference?</h2>
+        <p className="text-lg mb-8 max-w-xl mx-auto">
+          Start your campaign today or explore those already making an impact.
+        </p>
+        <Link href="/campaigns">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            className="bg-yellow-400 text-blue-900 px-8 py-3 rounded-full 
+                      text-lg font-semibold shadow-lg"
+          >
+            Get Started
+          </motion.button>
+        </Link>
       </section>
 
       {/* Footer */}
@@ -134,17 +161,17 @@ const LandingPage = () => {
           <div>
             <h4 className="font-semibold mb-4">Connect</h4>
             <div className="flex space-x-4">
-                <a href="#" className="hover:text-yellow-400">
-                    <FaFacebook className="w-6 h-6" />
-                </a>
-                <a href="#" className="hover:text-yellow-400">
-                    <FaTwitter className="w-6 h-6" />
-                </a>
-                <a href="#" className="hover:text-yellow-400">
-                    <FaInstagram className="w-6 h-6" />
-                </a>
+              <a href="#" className="hover:text-yellow-400">
+                <FaFacebook className="w-6 h-6" />
+              </a>
+              <a href="#" className="hover:text-yellow-400">
+                <FaTwitter className="w-6 h-6" />
+              </a>
+              <a href="#" className="hover:text-yellow-400">
+                <FaInstagram className="w-6 h-6" />
+              </a>
             </div>
-        </div>
+          </div>
         </div>
       </footer>
     </div>
