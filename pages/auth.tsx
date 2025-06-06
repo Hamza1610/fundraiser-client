@@ -7,8 +7,8 @@ import { FcGoogle } from 'react-icons/fc';
 import { 
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
+  // signInWithPopup,
+  // GoogleAuthProvider,
   sendPasswordResetEmail,
   updateProfile
 } from 'firebase/auth';
@@ -95,21 +95,21 @@ const AuthPage = () => {
 
   };
 
-  const handleGoogleAuth = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      const credential = await signInWithPopup(auth, provider);
+  // const handleGoogleAuth = async () => {
+  //   const provider = new GoogleAuthProvider();
+  //   try {
+  //     const credential = await signInWithPopup(auth, provider);
 
-      const user = credential.user;
-      console.log("Getting USER: ", user);
-      signUserToDatabase(user);
-      toast.success('Google authentication successful!');
-      // Redirect to campaign page
-      setTimeout(() => router.push('/campaigns'), 4000);
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
+  //     const user = credential.user;
+  //     console.log("Getting USER: ", user);
+  //     signUserToDatabase(user);
+  //     toast.success('Google authentication successful!');
+  //     // Redirect to campaign page
+  //     setTimeout(() => router.push('/campaigns'), 4000);
+  //   } catch (error: any) {
+  //     toast.error(error.message);
+  //   }
+  // };
 
   const handlePasswordReset = async () => {
     if (!resetEmail) {
@@ -134,7 +134,7 @@ const AuthPage = () => {
           {isLogin ? 'Welcome Back!' : 'Create Account'}
         </h2>
 
-        {/* Google Auth Button */}
+        {/* Google Auth Button - Commented out
         <button
           onClick={handleGoogleAuth}
           className="w-full flex items-center justify-center gap-2 bg-blue-100 text-blue-900 py-3 rounded-lg 
@@ -149,6 +149,7 @@ const AuthPage = () => {
           <span className="px-4 text-gray-500 text-sm">or</span>
           <div className="flex-1 border-t border-gray-300"></div>
         </div>
+        */}
 
         {/* Auth Form */}
         <form onSubmit={handleSubmit(handleEmailPasswordAuth)}>

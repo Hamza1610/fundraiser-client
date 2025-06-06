@@ -14,6 +14,7 @@ const Navbar = () => {
 
   const navItems = [
     { name: 'Campaigns', path: '/campaigns' },
+    { name: 'Admin', path: '/admin' },
     { name: 'Profile', path: '/profile' },
   ];
 
@@ -38,7 +39,7 @@ const Navbar = () => {
                   className={`px-3 py-2 rounded-md text-sm font-medium ${
                     router.pathname === item.path
                       ? 'bg-blue-800 text-white'
-                      : 'text-gray-300 hover:bg-blue-800 hover:text-white'
+                      : 'text-white hover:bg-blue-800 hover:text-white'
                   }`}
                 >
                   {item.name}
@@ -46,7 +47,7 @@ const Navbar = () => {
               ))}
               <button
                 onClick={handleLogout}
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-blue-800 hover:text-white"
+                className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-blue-800 hover:text-white"
               >
                 Logout
               </button>
@@ -57,7 +58,7 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-blue-800 focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-white hover:bg-blue-800 focus:outline-none"
             >
               {isOpen ? (
                 <FaTimes className="h-6 w-6" />
