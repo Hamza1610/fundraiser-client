@@ -4,6 +4,7 @@ import axios, { AxiosError } from 'axios';
 import { Campaign, Comment, Donation, SavedCampaign, CreateCampaignDTO, UpdateCampaignDTO } from '@/types/dataTypes';
 import { log } from 'console';
 import ResponseCache from 'next/dist/server/response-cache';
+import { User } from 'firebase/auth';
 // Add auth token interceptor
 apiClient.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
@@ -235,7 +236,7 @@ export const SavedCampaignAPI = {
   }
 };
 
-const UserAPI  = {
+export const UserAPI  = {
   saveUser: async (user: { uid: string, email: string, displayName: string, photoURL: string}) => {
     try {
       const response = await axios.post('/api/users', {
@@ -249,8 +250,16 @@ const UserAPI  = {
     } catch (error) {
       return handleError(error);
     }
-  }
+  },
 
+  getUser: async (uid: string) => {
+    try {
+      const response = await axios.get(`/api/users/${uid}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return handleError(error);
+    }
+  }
 }
 
 
