@@ -222,7 +222,7 @@ const AdminDashboard = () => {
         } lg:translate-x-0`}
       >
         <div className="p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-800">Admin Dashboard</h2>
+          <h2 className="text-xl font-bold text-gray-900">Admin Dashboard</h2>
         </div>
         <nav className="p-4 space-y-2">
           {['campaigns', 'donors', 'reports'].map((tab) => (
@@ -232,8 +232,8 @@ const AdminDashboard = () => {
                 setActiveTab(tab);
                 setIsMobileMenuOpen(false);
               }}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg ${
-                activeTab === tab ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
+              className={`w-full flex items-center gap-3 p-3 rounded-lg text-gray-900 ${
+                activeTab === tab ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -251,7 +251,7 @@ const AdminDashboard = () => {
             animate={{ opacity: 1 }}
             className="space-y-6"
           >
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Campaign Management</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Campaign Management</h1>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {campaigns.map((campaign) => (
@@ -260,10 +260,10 @@ const AdminDashboard = () => {
                   className="bg-white rounded-xl shadow-sm p-4 sm:p-6 hover:shadow-md transition-shadow"
                 >
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3 sm:mb-4">
-                    <h3 className="text-base sm:text-lg font-semibold">{campaign.title}</h3>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">{campaign.title}</h3>
                     <span className={`text-xs sm:text-sm px-2 py-1 rounded-full ${
-                      campaign.status === 'active' ? 'bg-green-100 text-green-600' :
-                      campaign.status === 'completed' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100'
+                      campaign.status === 'active' ? 'bg-green-100 text-green-700' :
+                      campaign.status === 'completed' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
                     }`}>
                       {campaign.status}
                     </span>
@@ -277,7 +277,7 @@ const AdminDashboard = () => {
                       />
                     </div>
 
-                    <div className="flex flex-col sm:flex-row justify-between text-xs sm:text-sm gap-1">
+                    <div className="flex flex-col sm:flex-row justify-between text-xs sm:text-sm text-gray-700 gap-1">
                       <span>Raised: ${campaign.raised.toLocaleString()}</span>
                       <span>Goal: ${campaign.goal.toLocaleString()}</span>
                     </div>
@@ -314,11 +314,11 @@ const AdminDashboard = () => {
             className="bg-white rounded-xl shadow-sm overflow-hidden"
           >
             <div className="p-4 sm:p-6">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Donor Management</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Donor Management</h1>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[600px]">
                   <thead>
-                    <tr className="text-left border-b text-sm">
+                    <tr className="text-left border-b text-sm text-gray-900">
                       <th className="pb-2 sm:pb-3">Donor</th>
                       <th className="pb-2 sm:pb-3">Email</th>
                       <th className="pb-2 sm:pb-3">Donated</th>
@@ -328,7 +328,7 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody>
                     {donors.map((donor) => (
-                      <tr key={donor._id} className="border-b hover:bg-gray-50 text-sm">
+                      <tr key={donor._id} className="border-b hover:bg-gray-50 text-sm text-gray-700">
                         <td className="py-3 sm:py-4">{donor.donorName}</td>
                         <td className="break-all">{donor.donorEmail}</td>
                         <td>${donor.amount.toLocaleString()}</td>
@@ -368,11 +368,11 @@ const AdminDashboard = () => {
             animate={{ opacity: 1 }}
             className="space-y-6 sm:space-y-8"
           >
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Analytics Reports</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Analytics Reports</h1>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm">
-                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Campaign Distribution</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Campaign Distribution</h3>
                 <div className="h-64 sm:h-80">
                   <Pie
                     data={campaignData}
@@ -385,7 +385,7 @@ const AdminDashboard = () => {
               </div>
               
               <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm">
-                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Donation Trends</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Donation Trends</h3>
                 <div className="h-64 sm:h-80">
                   <Line
                     data={donationData}
@@ -399,7 +399,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm">
-              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Top Campaigns</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Top Campaigns</h3>
               <div className="h-64 sm:h-80">
                 <Bar
                   data={{

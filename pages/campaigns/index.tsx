@@ -5,13 +5,18 @@ import { CampaignAPI } from '@/helpers/apiClient/apiClient';
 // Parent stays as-is, passing campaignsFunc prop:
 export default function Page() {
   const getCampaigns = async () => {
-    const response = await CampaignAPI.getCampaigns();
-    if (response.success) {
-      console.log('Fetched campaigns:', response.data.data);
-      return response.data.data;
-    } else {
-      console.error('Error fetching campaigns:', response);
-      return []; // Return an empty array on error
+    try {
+      const response = await CampaignAPI.getCampaigns();
+      if (response.success && Array.isArray(response.data.data)) {
+        console.log('Fetched campaigns:', response.data.data);
+        return response.data.data;
+      } else {
+        console.error('Invalid response format:', response);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+      return [];
     }
   };
   return <CampaignBrowsingComponent campaignsFunc={getCampaigns} />;
