@@ -193,38 +193,38 @@ const CampaignDetails = () => {
             className="bg-white rounded-xl p-6 shadow-lg"
           >
             <h2 className="text-2xl font-bold text-gray-800 mb-4">About this Campaign</h2>
-            <p className="text-gray-600">{campaign.description}</p>
+            <p className="text-gray-700 leading-relaxed">{campaign.description}</p>
             
             <div className="mt-8">
-              <h3 className="text-xl font-semibold mb-4">Updates</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Updates</h3>
               {campaign.updates.map((update: string, index: number) => (
                 <div key={index} className="p-4 bg-gray-50 rounded-lg mb-3">
-                  {update}
+                  <p className="text-gray-700">{update}</p>
                 </div>
               ))}
             </div>
 
             <div className="mt-8">
-              <h3 className="text-xl font-semibold mb-4">Comments ({comments.length})</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Comments ({comments.length})</h3>
               <form onSubmit={handleSubmit(onSubmitComment)} className="mb-6">
                 <textarea
                   {...register('comment', { required: true })}
-                  className="w-full p-3 border rounded-lg"
+                  className="w-full p-3 border rounded-lg text-gray-700"
                   placeholder="Add a comment..."
                   rows={3}
                 />
                 <button
                   type="submit"
-                  className="mt-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                  className="mt-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
                   Post Comment
                 </button>
               </form>
               {comments.map(comment => (
                 <div key={comment.id} className="bg-gray-50 p-4 rounded-lg mb-3">
-                  <p className="font-medium">{comment.author}</p>
-                  <p className="text-gray-600">{comment.content}</p>
-                  <p className="text-sm text-gray-400 mt-2">
+                  <p className="font-medium text-gray-800">{comment.author}</p>
+                  <p className="text-gray-700">{comment.content}</p>
+                  <p className="text-sm text-gray-500 mt-2">
                     {new Date(comment.timestamp).toLocaleDateString()}
                   </p>
                 </div>
@@ -284,27 +284,25 @@ const CampaignDetails = () => {
         <h3 className="text-2xl font-bold text-blue-600">
           ${(campaign.raised + donations).toLocaleString()}
         </h3>
-        <p className="text-gray-600">raised of ${campaign.goal.toLocaleString()} goal</p>
+        <p className="text-gray-700">raised of ${campaign.goal.toLocaleString()} goal</p>
       </div>
 
-      {/* Add this before the donation form */}
       {!user ? (
         <div className="text-center p-4 bg-yellow-50 rounded-lg">
           <p className="text-yellow-800">Please log in to make a donation</p>
           <button 
             onClick={() => router.push('/auth')}
-            className="mt-2 text-blue-600 hover:text-blue-800"
+            className="mt-2 text-blue-600 hover:text-blue-800 font-medium"
           >
             Log in
           </button>
         </div>
       ) : (
-        // Your existing donation form
         <div className="space-y-4">
           <input
             type="number"
             placeholder="Enter amount"
-            className="w-full p-3 border rounded-lg"
+            className="w-full p-3 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             value={donationAmount}
             onChange={(e) => setDonationAmount(Number(e.target.value))}
           />
@@ -314,7 +312,6 @@ const CampaignDetails = () => {
             campaignId={campaign._id}
             onSuccess={async (ref) => {
               try {
-                // Update campaign fund
                 await CampaignAPI.updateCampaignFund(campaign._id, donationAmount);
 
                 await DonationAPI.createDonation({
@@ -330,11 +327,12 @@ const CampaignDetails = () => {
                 toast.error('Failed to process donation');
               }
             }}
+            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
           />
         </div>
       )}
 
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-gray-600">
         <p>Secure payment powered by Paystack</p>
       </div>
     </div>

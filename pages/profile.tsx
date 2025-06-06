@@ -5,6 +5,7 @@ import { Donation, SavedCampaign } from '@/types/dataTypes';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { app } from '@/config/firebase';
 import { DonationAPI, SavedCampaignAPI } from '@/helpers/apiClient/apiClient';
+import { UserAPI } from '@/helpers/apiClient/apiClient';
 
 
 const UserDashboard = () => {
@@ -35,14 +36,19 @@ const UserDashboard = () => {
 
   useEffect(() => {
     const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUserData({
-          name: user.displayName || 'No Name',
-          email: user.email || 'No Email',
-          avatar: user.photoURL || 'https://randomuser.me/api/portraits/men/1.jpg',
-        });
-        
+        const userData = await UserAPI.getUser(user.uid);
+        if (userData.success && userData.data?.user) {
+          const userFromDB = userData.data.user;
+          setUserData({
+            name: userFromDB.displayName || 'No Name',
+            email: userFromDB.email || 'No Email',
+            avatar: userFromDB.photoURL || 'https://randomuser.me/api/portraits/men/1.jpg',
+          });
+        } else {
+          console.log('Failed to fetch user data from database');
+        }
       } else {
         console.log('No user is signed in.');
       }
