@@ -24,13 +24,13 @@ const CampaignCard = ({ campaign, index }: CampaignCardProps) => {
         <span className="text-sm text-blue-600 font-semibold">
           {campaign.category}
         </span>
-        <h3 className="text-xl font-bold text-gray-800 mt-2">
+        <h3 className="text-xl font-bold text-gray-900 mt-2">
           {campaign.title}
         </h3>
-        <p className="text-gray-600 mt-2">{campaign.description}</p>
+        <p className="text-gray-700 mt-2">{campaign.description}</p>
         
         <div className="mt-4">
-          <div className="flex justify-between text-sm font-semibold text-gray-600">
+          <div className="flex justify-between text-sm font-semibold text-gray-700">
             <span>Raised: ${campaign.raised.toLocaleString()}</span>
             <span>Goal: ${campaign.goal.toLocaleString()}</span>
           </div>

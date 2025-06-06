@@ -123,10 +123,10 @@ export default function CreateCampaignModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
       <div className="bg-white rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold">Create New Campaign</h3>
+          <h3 className="text-xl font-bold text-gray-900">Create New Campaign</h3>
           <button 
             onClick={() => setShowCreateModal(false)}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-700 hover:text-gray-900"
             type="button"
           >
             <FiX className="w-5 h-5" />
@@ -141,26 +141,26 @@ export default function CreateCampaignModal({
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-1">Title</label>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-900 mb-1">Title</label>
             <input
               id="title"
               name="title"
               value={formData.title}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded-lg"
+              className="w-full p-2 border rounded-lg text-gray-900 placeholder-gray-500"
               placeholder="Campaign title"
               required
             />
           </div>
           
           <div>
-            <label htmlFor="category" className="block text-sm font-medium mb-1">Category</label>
+            <label htmlFor="category" className="block text-sm font-medium text-gray-900 mb-1">Category</label>
             <select
               id="category"
               name="category"
               value={formData.category}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded-lg"
+              className="w-full p-2 border rounded-lg text-gray-900"
               required
             >
               <option value="Education">Education</option>
@@ -171,40 +171,40 @@ export default function CreateCampaignModal({
           </div>
           
           <div>
-            <label htmlFor="goal" className="block text-sm font-medium mb-1">Goal Amount ($)</label>
+            <label htmlFor="goal" className="block text-sm font-medium text-gray-900 mb-1">Goal Amount ($)</label>
             <input
               id="goal"
               name="goal"
               type="number"
               value={formData.goal}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded-lg"
+              className="w-full p-2 border rounded-lg text-gray-900"
               min="0"
               required
             />
           </div>
           
           <div>
-            <label htmlFor="description" className="block text-sm font-medium mb-1">Enter fund description</label>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-900 mb-1">Enter fund description</label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded-lg"
+              className="w-full p-2 border rounded-lg text-gray-900"
               rows={4}
               required
             ></textarea>
           </div>
             
           <div>
-            <label htmlFor="image" className="block text-sm font-medium mb-1">Upload fund picture</label>
+            <label htmlFor="image" className="block text-sm font-medium text-gray-900 mb-1">Upload fund picture</label>
             <input
               id="image"
               name="image"
               type="file"
               accept=".png, .jpg, .jpeg, .webp"
-              className="w-full p-2 border rounded-lg"
+              className="w-full p-2 border rounded-lg text-gray-900"
               onChange={handleFileChange}
             />
           </div>
@@ -224,7 +224,7 @@ export default function CreateCampaignModal({
             <button
               type="button"
               onClick={() => setShowCreateModal(false)}
-              className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300"
+              className="flex-1 bg-gray-200 text-gray-900 py-3 rounded-lg hover:bg-gray-300"
             >
               Cancel
             </button>
